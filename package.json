@@ -4,15 +4,36 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "bundleRelease:android": "cd android && gradlew.bat bundleRelease && cd ..",
+    "assembleRelease:android": "cd android && gradlew.bat assembleRelease && cd ..",
+    "assembleDebug:android": "cd android && gradlew.bat assembleDebug && cd ..",
+    "releaseAndroid": "npm run bundleRelease:android && npm run assembleRelease:android",
+    "installAndroidRelease": "npm run releaseAndroid && adb install -r android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+    "c:ios": "cd ios && xcodebuild clean && cd ..",
+    "clean:ios": "echo '🔥 Cleaning iOS build...' && rm -rf ios/build ios/Pods || sudo rm -rf ios/build ios/Pods && echo '🔥 Cleaning DerivedData...' && rm -rf ~/Library/Developer/Xcode/DerivedData || sudo rm -rf ~/Library/Developer/Xcode/DerivedData && echo '✅ Done cleaning iOS'",
+    "c:android": "cd android && gradlew.bat clean && cd ..",
+    "android:release": "react-native run-android --variant=release"
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.15.10",
+    "@react-navigation/native": "^7.2.2",
+    "@react-navigation/stack": "^7.8.11",
+    "axios": "^1.15.2",
     "expo": "~54.0.33",
+    "expo-image-picker": "~17.0.11",
     "expo-status-bar": "~3.0.9",
+    "expo-system-ui": "~6.0.9",
+    "lucide-react-native": "^1.12.0",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "^2.31.1",
+    "react-native-reanimated": "^4.3.0",
+    "react-native-safe-area-context": "^5.7.0",
+    "react-native-screens": "^4.24.0",
+    "react-native-svg": "^15.12.1"
   },
   "private": true
 }
