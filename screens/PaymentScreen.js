@@ -32,8 +32,8 @@ export default function PaymentScreen({ navigation, route }) {
           <Text style={styles.successDesc}>
             Your appointment with {doctor?.name || 'the doctor'} has been confirmed and paid.
           </Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.doneButton}
             onPress={() => navigation.navigate('Main')}
           >
@@ -71,7 +71,7 @@ export default function PaymentScreen({ navigation, route }) {
         <Text style={styles.sectionTitle}>Payment Method</Text>
         <View style={styles.methodList}>
           {paymentMethods.map((method) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={method.id}
               style={[
                 styles.methodItem,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     fontSize: 15,
-    color: '#1E293B',
+    color: '#000',
   },
   rowInputs: {
     flexDirection: 'row',

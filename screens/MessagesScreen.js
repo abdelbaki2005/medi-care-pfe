@@ -22,15 +22,6 @@ const chats = [
     online: false,
     image: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200',
   },
-  {
-    id: 3,
-    name: 'Dr. Elena Rodriguez',
-    message: "Hello! How are you feeling after the treatment?",
-    time: 'Oct 20',
-    unread: 0,
-    online: true,
-    image: 'https://images.unsplash.com/photo-1559839734-2b71ce4248ce?w=200',
-  }
 ];
 
 export default function MessagesScreen({ navigation }) {
@@ -46,7 +37,11 @@ export default function MessagesScreen({ navigation }) {
       <View style={styles.searchBox}>
         <View style={styles.searchWrapper}>
           <Search color="#94A3B8" size={20} />
-          <TextInput placeholder="Search messages..." style={styles.searchInput} />
+          <TextInput 
+            placeholder="Search messages..."
+            placeholderTextColor={'#94A3B8'}
+            color={'black'}
+            style={styles.searchInput} />
         </View>
       </View>
 
@@ -121,6 +116,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
+    color: '#000',
   },
   chatItem: {
     flexDirection: 'row',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { User, Mail, Lock, Activity, Upload, ChevronDown, ArrowRight } from 'lucide-react-native';
+import { User, Mail, Lock, Activity, Upload, ChevronDown, ArrowRight, Eye, EyeOff } from 'lucide-react-native';
 import { authApi } from '../services/api';
 import { ActivityIndicator, Image as RNImage } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,39 +11,119 @@ export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [specialty, setSpecialty] = useState('');
+  const [showSpecialtyPicker, setShowSpecialtyPicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [certificate, setCertificate] = useState(null);
+  const [showCertificatePreview, setShowCertificatePreview] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const SPECIALTIES = [
+    'Cardiology',
+    'Dermatology',
+    'Neurology',
+    'Pediatrics',
+    'Psychiatry',
+    'Orthopedics',
+    'Ophthalmology',
+    'Otolaryngology',
+    'Gastroenterology',
+    'Pulmonology',
+    'Nephrology',
+    'Rheumatology',
+    'Oncology',
+    'Radiology',
+    'Pathology',
+    'Anesthesiology',
+    'General Surgery',
+    'Urology',
+    'Gynecology',
+    'Family Medicine',
+  ];
+
+  const validateEmail = (value) => /\S+@\S+\.\S+/.test(value);
+  const validatePassword = (value) => value.length >= 6;
+
+  const getFileTypeFromUri = (uri) => {
+    const extension = uri.split('.').pop()?.toLowerCase();
+    if (extension === 'pdf') return 'application/pdf';
+    if (extension === 'png') return 'image/png';
+    if (extension === 'jpg' || extension === 'jpeg') return 'image/jpeg';
+    return '';
+  };
+
+  const isValidCertificateType = (uri) => {
+    const type = getFileTypeFromUri(uri);
+    return ['application/pdf', 'image/png', 'image/jpeg'].includes(type);
+  };
+
+  const canSubmit = () => {
+    if (!fullName.trim() || !validateEmail(email) || !validatePassword(password)) {
+      return false;
+    }
+    if (role === 'doctor') {
+      return specialty.trim().length > 0 && certificate && isValidCertificateType(certificate.uri);
+    }
+    return true;
+  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
       quality: 1,
     });
 
     if (!result.canceled) {
-      setCertificate(result.assets[0]);
+      const picked = result.assets[0];
+      if (!isValidCertificateType(picked.uri)) {
+        return alert('Please upload a valid certificate file: JPG, PNG, or PDF');
+      }
+      setCertificate(picked);
+      setShowCertificatePreview(true);
     }
   };
 
   const handleRegister = async () => {
-    if (!fullName || !email || !password) return alert('Please fill in required fields');
-    if (role === 'doctor' && !certificate) return alert('Please upload your certificate');
+    const validationErrors = {};
 
+    if (!fullName.trim()) validationErrors.fullName = 'Full name is required.';
+    if (!email.trim()) validationErrors.email = 'Email is required.';
+    else if (!validateEmail(email)) validationErrors.email = 'Enter a valid email address.';
+    if (!password) validationErrors.password = 'Password is required.';
+    else if (!validatePassword(password)) validationErrors.password = 'Password must be at least 6 characters.';
+    if (role === 'doctor') {
+      if (!specialty.trim()) validationErrors.specialty = 'Specialty is required for doctors.';
+      if (!certificate) validationErrors.certificate = 'Certificate upload is required for doctors.';
+      else if (!isValidCertificateType(certificate.uri)) validationErrors.certificate = 'Certificate must be JPG, PNG, or PDF.';
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
+
     try {
       const formData = new FormData();
-      formData.append('fullName', fullName);
-      formData.append('email', email);
+      formData.append('fullName', fullName.trim());
+      formData.append('email', email.trim());
       formData.append('password', password);
-      formData.append('role', role);
+      formData.append('userType', role);
+
       if (role === 'doctor') {
-        formData.append('specialty', specialty);
+        formData.append('speciality', specialty.trim());
+
+        const fileType = getFileTypeFromUri(certificate.uri);
+        const fileName = certificate.uri.split('/').pop() || 'certificate.pdf';
+
         formData.append('certificate', {
           uri: certificate.uri,
-          name: 'certificate.jpg',
-          type: 'image/jpeg',
+          name: fileName,
+          type: fileType,
         });
       }
 
@@ -51,7 +131,6 @@ export default function RegisterScreen({ navigation }) {
       navigation.navigate('Main', { user: response.data.user });
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || 'Registration failed';
-      console.log('Registration Error Details:', err.config ? `URL: ${err.config.url}` : '', err.message);
       alert(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
@@ -101,6 +180,7 @@ export default function RegisterScreen({ navigation }) {
                   onChangeText={setFullName}
                 />
               </View>
+              {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
             </View>
 
             <View style={styles.inputGroup}>
@@ -117,6 +197,7 @@ export default function RegisterScreen({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
+              {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </View>
 
             <View style={styles.inputGroup}>
@@ -129,9 +210,21 @@ export default function RegisterScreen({ navigation }) {
                   placeholderTextColor={'gray'}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
                 />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{ padding: 8 }}
+                >
+                  {showPassword ? (
+                    <Eye color="#94A3B8" size={20} />
+                  ) : (
+                    <EyeOff color="#94A3B8" size={20} />
+                  )}
+                </TouchableOpacity>
               </View>
+              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
 
             {/* Doctor Specific Fields */}
@@ -140,34 +233,121 @@ export default function RegisterScreen({ navigation }) {
                 <View style={styles.divider} />
                 <View style={styles.inputGroup}>
                   <Text style={[styles.label, { color: '#64748B' }]}>Specialty & Verification (Doctor Only)</Text>
-                  <View style={styles.inputWrapper}>
+                  <TouchableOpacity
+                    style={styles.inputWrapper}
+                    onPress={() => setShowSpecialtyPicker(true)}
+                  >
                     <Activity color="#94A3B8" size={20} style={styles.icon} />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Select Specialty"
-                      placeholderTextColor={'gray'}
-                      value={specialty}
-                      onChangeText={setSpecialty}
-                    />
+                    <Text
+                      style={[
+                        styles.input,
+                        { color: specialty ? '#1E293B' : '#9CA3AF' }
+                      ]}
+                    >
+                      {specialty || 'Select Specialty'}
+                    </Text>
                     <ChevronDown color="#94A3B8" size={20} />
-                  </View>
+                  </TouchableOpacity>
+                  {errors.specialty && <Text style={styles.errorText}>{errors.specialty}</Text>}
                 </View>
 
-                <TouchableOpacity style={styles.uploadCard} onPress={pickImage}>
+                <Modal
+                  visible={showSpecialtyPicker}
+                  transparent
+                  animationType="slide"
+                  onRequestClose={() => setShowSpecialtyPicker(false)}
+                >
+                  <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
+                    <View style={{
+                      backgroundColor: 'white',
+                      borderTopLeftRadius: 24,
+                      borderTopRightRadius: 24,
+                      paddingTop: 16,
+                      maxHeight: '80%',
+                    }}>
+                      <View style={{ paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#E2E8F0' }}>
+                        <Text style={{ fontSize: 18, fontWeight: '700', color: '#1E293B' }}>Select Specialty</Text>
+                      </View>
+                      <ScrollView style={{ paddingHorizontal: 24 }}>
+                        {SPECIALTIES.map((spec) => (
+                          <TouchableOpacity
+                            key={spec}
+                            onPress={() => {
+                              setSpecialty(spec);
+                              setShowSpecialtyPicker(false);
+                            }}
+                            style={{
+                              paddingVertical: 16,
+                              borderBottomWidth: 1,
+                              borderBottomColor: '#F1F5F9',
+                            }}
+                          >
+                            <Text style={{
+                              fontSize: 16,
+                              color: specialty === spec ? '#1552C1' : '#1E293B',
+                              fontWeight: specialty === spec ? '600' : '400',
+                            }}>
+                              {spec}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                      <View style={{ paddingHorizontal: 24, paddingVertical: 16, borderTopWidth: 1, borderTopColor: '#E2E8F0' }}>
+                        <TouchableOpacity
+                          onPress={() => setShowSpecialtyPicker(false)}
+                          style={{
+                            backgroundColor: '#F1F5F9',
+                            paddingVertical: 12,
+                            borderRadius: 12,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Text style={{ color: '#1E293B', fontWeight: '600', fontSize: 16 }}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
+
+                <TouchableOpacity style={styles.uploadCard} onPress={pickImage} activeOpacity={0.75}>
                   {certificate ? (
-                    <RNImage source={{ uri: certificate.uri }} style={{ width: '100%', height: 100, borderRadius: 12 }} />
+                    <>
+                      <RNImage source={{ uri: certificate.uri }} style={{ width: '100%', height: 140, borderRadius: 12 }} />
+                      <Text style={[styles.uploadTitle, { marginTop: 12 }]}>Tap to replace certificate</Text>
+                    </>
                   ) : (
                     <>
                       <Upload color="#94A3B8" size={24} />
                       <Text style={styles.uploadTitle}>Upload Medical License / Certificate</Text>
-                      <Text style={styles.uploadDesc}>PDF, PNG or JPG (Max 5MB)</Text>
+                      <Text style={styles.uploadDesc}>PNG or JPG (Max 5MB)</Text>
                     </>
                   )}
                 </TouchableOpacity>
+                {errors.certificate && <Text style={styles.errorText}>{errors.certificate}</Text>}
+
+                <Modal
+                  visible={showCertificatePreview}
+                  transparent
+                  animationType="slide"
+                  onRequestClose={() => setShowCertificatePreview(false)}
+                >
+                  <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>Certificate Preview</Text>
+                      <RNImage source={{ uri: certificate?.uri }} style={styles.modalImage} />
+                      <TouchableOpacity
+                        style={styles.modalButton}
+                        onPress={() => setShowCertificatePreview(false)}
+                      >
+                        <Text style={styles.modalButtonText}>Done</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Modal>
               </>
             )}
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
+            <TouchableOpacity style={[styles.button, (!canSubmit() || loading) && styles.buttonDisabled]} onPress={handleRegister} disabled={!canSubmit() || loading}>
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
@@ -294,7 +474,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1E293B',
+    color: '#000',
   },
   divider: {
     height: 1,
@@ -312,6 +492,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 160,
     marginBottom: 32,
   },
   uploadTitle: {
@@ -319,11 +500,52 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#475569',
     marginTop: 12,
+    textAlign: 'center',
   },
   uploadDesc: {
     fontSize: 12,
     color: '#94A3B8',
     marginTop: 4,
+    textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 16,
+  },
+  modalImage: {
+    width: '100%',
+    height: 240,
+    borderRadius: 16,
+    marginBottom: 24,
+  },
+  modalButton: {
+    backgroundColor: '#1552C1',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
   },
   button: {
     backgroundColor: '#1552C1',
@@ -334,11 +556,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginTop: 12,
   },
+  buttonDisabled: {
+    backgroundColor: '#94A3B8',
+  },
   buttonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '700',
     marginRight: 8,
+  },
+  errorText: {
+    color: '#DC2626',
+    marginTop: 8,
+    fontSize: 12,
   },
   footer: {
     flexDirection: 'row',

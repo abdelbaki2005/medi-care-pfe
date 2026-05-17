@@ -3,57 +3,125 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, Clock, MapPin, ChevronRight, Bell } from 'lucide-react-native';
 import { appointmentApi } from '../services/api';
-import { ActivityIndicator } from 'react-native';
 
-export default function BookingsScreen({ route }) {
-  const [appointments, setAppointments] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+export default function BookingsScreen({ navigation, route }) {
+  const [activeTab, setActiveTab] = React.useState('Upcoming');
   const user = route.params?.user;
 
-  React.useEffect(() => {
-    if (user?.id) {
-      fetchBookings();
-    }
-  }, [user]);
+  const mockAppointments = [
+    {
+      _id: '1',
+      doctor: {
+        _id: 'd1',
+        name: 'Dr. James Wilson',
+        fullName: 'Dr. James Wilson',
+        specialty: 'Cardiologist',
+        image: 'https://images.unsplash.com/photo-1612349317150-e539c7599306?w=150',
+        rating: 4.9,
+        reviews: 128
+      },
+      date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      time: '10:30 AM',
+      status: 'confirmed'
+    },
+    {
+      _id: '2',
+      doctor: {
+        _id: 'd2',
+        name: 'Dr. Sarah Mitchell',
+        fullName: 'Dr. Sarah Mitchell',
+        specialty: 'Dermatologist',
+        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
+        rating: 4.8,
+        reviews: 95
+      },
+      date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      time: '2:00 PM',
+      status: 'pending'
+    },
+    {
+      _id: '3',
+      doctor: {
+        _id: 'd3',
+        name: 'Dr. Michael Chen',
+        fullName: 'Dr. Michael Chen',
+        specialty: 'Neurologist',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+        rating: 4.7,
+        reviews: 112
+      },
+      date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      time: '9:00 AM',
+      status: 'completed'
+    },
+    {
+      _id: '4',
+      doctor: {
+        _id: 'd4',
+        name: 'Dr. Emma Johnson',
+        fullName: 'Dr. Emma Johnson',
+        specialty: 'General Practitioner',
+        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+        rating: 4.6,
+        reviews: 87
+      },
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      time: '11:00 AM',
+      status: 'cancelled'
+    },
+    {
+      _id: '5',
+      doctor: {
+        _id: 'd5',
+        name: 'Dr. Robert Williams',
+        fullName: 'Dr. Robert Williams',
+        specialty: 'Orthopedist',
+        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+        rating: 4.9,
+        reviews: 156
+      },
+      date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      time: '3:30 PM',
+      status: 'completed'
+    },
+  ];
 
-  const fetchBookings = async () => {
-    try {
-      const response = await appointmentApi.getUserAppointments(user.id);
-      setAppointments(response.data);
-    } catch (err) {
-      console.error('Failed to fetch bookings:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredAppointments = mockAppointments.filter(app => {
+    if (activeTab === 'Upcoming') return app.status === 'confirmed' || app.status === 'pending';
+    if (activeTab === 'Past') return app.status === 'completed';
+    if (activeTab === 'Cancelled') return app.status === 'cancelled';
+    return true;
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Bookings</Text>
-        <TouchableOpacity style={styles.bellButton}>
+        <TouchableOpacity 
+          style={styles.bellButton}
+          onPress={() => navigation.navigate('Notifications')}
+        >
           <Bell color="#1E293B" size={24} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.tabBar}>
-        <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-          <Text style={[styles.tabText, styles.activeTabText]}>Upcoming</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.tabText}>Past</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.tabText}>Cancelled</Text>
-        </TouchableOpacity>
+        {['Upcoming', 'Past', 'Cancelled'].map(tab => (
+          <TouchableOpacity 
+            key={tab}
+            style={[styles.tab, activeTab === tab && styles.activeTab]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#1552C1" style={{ marginTop: 40 }} />
-        ) : appointments.length === 0 ? (
-          <Text style={{ textAlign: 'center', marginTop: 40, color: '#64748B' }}>No bookings found.</Text>
+        {filteredAppointments.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 40, color: '#64748B' }}>No {activeTab.toLowerCase()} bookings found.</Text>
         ) : (
-          appointments.map((item) => (
+          filteredAppointments.map((item) => (
             <TouchableOpacity key={item._id} style={styles.bookingCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.doctorInfo}>
@@ -63,9 +131,19 @@ export default function BookingsScreen({ route }) {
                     <Text style={styles.doctorSub}>{item.doctor?.specialty}</Text>
                   </View>
                 </View>
-                <View style={[styles.statusBadge, styles.upcomingBadge]}>
-                  <Text style={[styles.statusText, styles.upcomingText]}>
-                    {item.status}
+                <View style={[
+                  styles.statusBadge, 
+                  item.status === 'confirmed' ? styles.upcomingBadge : 
+                  item.status === 'completed' ? styles.completedBadge : 
+                  styles.cancelledBadge
+                ]}>
+                  <Text style={[
+                    styles.statusText, 
+                    item.status === 'confirmed' ? styles.upcomingText : 
+                    item.status === 'completed' ? styles.completedText : 
+                    styles.cancelledText
+                  ]}>
+                    {item.status.toUpperCase()}
                   </Text>
                 </View>
               </View>
@@ -81,14 +159,19 @@ export default function BookingsScreen({ route }) {
                 </View>
               </View>
 
-              <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.secondaryButton}>
-                  <Text style={styles.secondaryButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.primaryButton}>
-                  <Text style={styles.primaryButtonText}>Reschedule</Text>
-                </TouchableOpacity>
-              </View>
+              {activeTab === 'Upcoming' && (
+                <View style={styles.actionRow}>
+                  <TouchableOpacity style={styles.secondaryButton}>
+                    <Text style={styles.secondaryButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.primaryButton}
+                    onPress={() => navigation.navigate('DoctorDetails', { doctor: item.doctor, user })}
+                  >
+                    <Text style={styles.primaryButtonText}>Reschedule</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </TouchableOpacity>
           ))
         )}
@@ -205,6 +288,12 @@ const styles = StyleSheet.create({
   },
   completedText: {
     color: '#059669',
+  },
+  cancelledBadge: {
+    backgroundColor: '#FEF2F2',
+  },
+  cancelledText: {
+    color: '#EF4444',
   },
   cardFooter: {
     borderTopWidth: 1,

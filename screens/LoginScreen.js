@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Mail, Lock, ArrowRight, Activity } from 'lucide-react-native';
+import { Mail, Lock, ArrowRight, Activity, Eye, EyeOff } from 'lucide-react-native';
 import { authApi } from '../services/api';
 import { ActivityIndicator } from 'react-native';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) return alert('Please fill in all fields');
-    
+
     setLoading(true);
     try {
       const response = await authApi.login({ email, password });
       // In a real app, save token to AsyncStorage
       navigation.navigate('Main', { user: response.data.user });
     } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+      const errorMsg = err.response?.data?.message || err.message || 'Login failed';
+      alert(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -65,8 +67,19 @@ export default function LoginScreen({ navigation }) {
                 placeholderTextColor={'gray'}
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
               />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={{ padding: 8 }}
+              >
+                {showPassword ? (
+                  <Eye color="#94A3B8" size={20} />
+                ) : (
+                  <EyeOff color="#94A3B8" size={20} />
+                )}
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -167,7 +180,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1E293B',
+    color: '#000',
   },
   button: {
     backgroundColor: '#1552C1',

@@ -8,20 +8,13 @@ export default function ProfileScreen({ navigation, route }) {
   
   const userData = {
     name: user?.fullName || 'Eleanor Shellstrop',
-    id: user?.id ? `#MC-${user.id.slice(-5).toUpperCase()}` : '#MC-98231',
     image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
-    stats: [
-      { label: 'Heart Rate', value: '72 bpm', icon: Heart, color: '#3B82F6' },
-      { label: 'Blood Pressure', value: '120/80', icon: Activity, color: '#EF4444' },
-      { label: 'Temp.', value: '98.6 °F', icon: Thermometer, color: '#F59E0B' },
-    ]
   };
 
   const menuItems = [
-    { label: 'My Medical Records', icon: Shield, color: '#1552C1' },
-    { label: 'Payments & Subscriptions', icon: CreditCard, color: '#10B981' },
-    { label: 'Notifications', icon: Bell, color: '#F59E0B' },
-    { label: 'Settings', icon: Settings, color: '#64748B' },
+    { label: 'Payments', icon: CreditCard, color: '#10B981', screen: 'PaymentHistory' },
+    { label: 'Notifications', icon: Bell, color: '#F59E0B', screen: 'Notifications' },
+    { label: 'Settings', icon: Settings, color: '#64748B', screen: 'Settings' },
   ];
 
   return (
@@ -30,33 +23,15 @@ export default function ProfileScreen({ navigation, route }) {
         <View style={styles.profileCard}>
           <Image source={{ uri: userData.image }} style={styles.profileImage} />
           <Text style={styles.userName}>{userData.name}</Text>
-          <Text style={styles.userId}>Patient ID: {userData.id}</Text>
-          
-          <View style={styles.tagRow}>
-            <View style={[styles.tag, { backgroundColor: '#EFF6FF' }]}>
-              <Text style={[styles.tagText, { color: '#3B82F6' }]}>Type 2 Diabetes</Text>
-            </View>
-            <View style={[styles.tag, { backgroundColor: '#FEF2F2' }]}>
-              <Text style={[styles.tagText, { color: '#EF4444' }]}>Hypertension</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.statsRow}>
-          {userData.stats.map((stat, index) => (
-            <View key={index} style={styles.statBox}>
-              <View style={[styles.statIcon, { backgroundColor: stat.color + '15' }]}>
-                <stat.icon color={stat.color} size={20} />
-              </View>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-              <Text style={styles.statValue}>{stat.value}</Text>
-            </View>
-          ))}
         </View>
 
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem}>
+            <TouchableOpacity 
+              key={index} 
+              style={styles.menuItem}
+              onPress={() => navigation.navigate(item.screen)}
+            >
               <View style={styles.menuItemLeft}>
                 <View style={[styles.menuIcon, { backgroundColor: item.color + '10' }]}>
                   <item.icon color={item.color} size={20} />
@@ -105,11 +80,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     color: '#1E293B',
-  },
-  userId: {
-    fontSize: 14,
-    color: '#64748B',
-    marginTop: 4,
   },
   tagRow: {
     flexDirection: 'row',

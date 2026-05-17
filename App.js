@@ -14,6 +14,9 @@ import DoctorDetailsScreen from './screens/DoctorDetailsScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
 import ChatScreen from './screens/ChatScreen';
 import PaymentScreen from './screens/PaymentScreen';
+import PaymentHistoryScreen from './screens/PaymentHistoryScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import PrivacySecurityScreen from './screens/PrivacySecurityScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,10 +45,16 @@ function TabNavigator() {
 }
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useColorScheme } from 'react-native';
 
 export default function App() {
+  const colorScheme = useColorScheme();
+  const statusBarStyle = colorScheme === 'dark' ? 'light' : 'dark';
+
   return (
     <SafeAreaProvider>
+      <StatusBar style={statusBarStyle} />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />
@@ -55,6 +64,9 @@ export default function App() {
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="Payment" component={PaymentScreen} />
+          <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="PrivacySecurity" component={PrivacySecurityScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

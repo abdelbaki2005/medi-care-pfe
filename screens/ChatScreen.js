@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Video, MoreVertical, Plus, Send, Calendar } from 'lucide-react-native';
 import { messageApi } from '../services/api';
-import { ActivityIndicator } from 'react-native';
 
 const initialMessages = [];
 
@@ -92,7 +91,7 @@ export default function ChatScreen({ route, navigation }) {
         </View>
 
         {loading ? (
-          <ActivityIndicator color="#1552C1" style={{ marginTop: 20 }} />
+          <Text></Text>
         ) : (
           messages.map((msg) => (
             <View key={msg.id} style={[styles.messageRow, msg.sender === 'patient' ? styles.patientRow : styles.doctorRow]}>
@@ -326,7 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     paddingHorizontal: 20,
     fontSize: 15,
-    color: '#1E293B',
+    color: '#000',
   },
   sendButton: {
     width: 44,

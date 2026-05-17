@@ -10,6 +10,22 @@ const specialties = [
   { id: 2, name: 'Pediatrics', icon: '👶', color: '#EFF6FF' },
   { id: 3, name: 'Neurology', icon: '🧠', color: '#F5F3FF' },
   { id: 4, name: 'Dermatology', icon: '🧴', color: '#ECFDF5' },
+  { id: 5, name: 'Psychiatry', icon: '🧠', color: '#FEE2E2' },
+  { id: 6, name: 'Orthopedics', icon: '🦴', color: '#E0F2FE' },
+  { id: 7, name: 'Ophthalmology', icon: '👁️', color: '#EDE9FE' },
+  { id: 8, name: 'Otolaryngology', icon: '👂', color: '#ECFDF5' },
+  { id: 9, name: 'Gastroenterology', icon: '🫀', color: '#FEFCE8' },
+  { id: 10, name: 'Pulmonology', icon: '🌬️', color: '#EFF6FF' },
+  { id: 11, name: 'Nephrology', icon: '🫁', color: '#F0F9FF' },
+  { id: 12, name: 'Rheumatology', icon: '🦵', color: '#F5F3FF' },
+  { id: 13, name: 'Oncology', icon: '🎗️', color: '#FCE7F3' },
+  { id: 14, name: 'Radiology', icon: '🩻', color: '#E0F2FE' },
+  { id: 15, name: 'Pathology', icon: '🧬', color: '#EEF2FF' },
+  { id: 16, name: 'Anesthesiology', icon: '💉', color: '#F8FAFC' },
+  { id: 17, name: 'General Surgery', icon: '🔪', color: '#FEE2E2' },
+  { id: 18, name: 'Urology', icon: '🚽', color: '#ECFDF5' },
+  { id: 19, name: 'Gynecology', icon: '👩‍⚕️', color: '#FCE7F3' },
+  { id: 20, name: 'Family Medicine', icon: '🏥', color: '#E7F5FF' },
 ];
 
 export default function HomeScreen({ navigation }) {
@@ -47,7 +63,7 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.searchWrapper}>
             <Search color="#94A3B8" size={20} style={styles.searchIcon} />
             <TextInput
-              placeholder="Search doctors, clinics, ..."
+              placeholder="Search for doctors ..."
               placeholderTextColor={'gray'}
               style={styles.searchInput}
             />
@@ -188,6 +204,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
+    color: '#000',
   },
   searchButton: {
     backgroundColor: '#1552C1',
