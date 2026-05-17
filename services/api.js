@@ -72,6 +72,15 @@ export const authApi = {
       },
       body: formData,
     }),
+
+  uploadDoctorCertificate: (formData) =>
+    fetchWithLogging(`${API_BASE_URL}/auth/doctor/certificate`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+      },
+      body: formData,
+    }),
 };
 
 const mockDelay = (data) => new Promise((resolve) => setTimeout(() => resolve({ data }), 800));

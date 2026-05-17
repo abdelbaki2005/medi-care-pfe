@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "Medi-Care API",
+    "description": "Postman Collection for Medi-Care Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Root API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "fullName", "value": "Dr. Smith", "type": "text"},
+                {"key": "email", "value": "smith@example.com", "type": "text"},
+                {"key": "password", "value": "password123", "type": "text"},
+                {"key": "userType", "value": "doctor", "type": "text"},
+                {"key": "speciality", "value": "Cardiologist", "type": "text"},
+                {"key": "file", "type": "file", "src": []}
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"smith@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Test Certificate Upload",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "file", "type": "file", "src": []}
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/doctor/certificate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "doctor", "certificate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get User Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Book Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointmentId\": \"123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/bookings/book",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "bookings", "book"]
+            }
+          }
+        },
+        {
+          "name": "Protected Content",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/protected",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "protected"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Doctors",
+      "item": [
+        {
+          "name": "Get Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "doctors"]
+            }
+          }
+        },
+        {
+          "name": "Complete Bio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Consultant in Cardiology\",\n  \"bio\": \"Dr. Smith is a renowned cardiologist with over 15 years of experience in diagnosing and treating complex heart conditions. He is dedicated to patient care.\",\n  \"specialities\": [\"Cardiology\", \"Internal Medicine\"],\n  \"certification\": [\"Board Certified Cardiologist\", \"MD\"],\n  \"reviews\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/completeBio",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "doctors", "completeBio"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointmentDate\": \"2024-12-01\",\n  \"appointmentTime\": \"10:00 AM\",\n  \"consultationFee\": 150\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/appointments/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "doctors", "appointments", "create"]
+            }
+          }
+        },
+        {
+          "name": "Update Appointment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointmentId\": \"123456789\",\n  \"appointmentDate\": \"2024-12-02\",\n  \"appointmentTime\": \"11:00 AM\",\n  \"status\": \"rescheduled\",\n  \"consultationFee\": 150\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/appointments/update",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "doctors", "appointments", "update"]
+            }
+          }
+        },
+        {
+          "name": "Delete Appointment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointmentId\": \"123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/doctors/appointments/delete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "doctors", "appointments", "delete"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": "your_access_token_here"
+    }
+  ]
+}

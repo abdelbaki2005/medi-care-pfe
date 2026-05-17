@@ -85,6 +85,29 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
+  const uploadDoctorCertificate = async () => {
+    const uploadData = new FormData();
+    const fileType = getFileTypeFromUri(certificate.uri);
+    const fileName = certificate.uri.split('/').pop() || 'certificate.pdf';
+
+    uploadData.append('file', {
+      uri: certificate.uri,
+      name: fileName,
+      type: fileType,
+    });
+
+    const uploadResponse = await authApi.uploadDoctorCertificate(uploadData);
+    return (
+      uploadResponse.data?.url ||
+      uploadResponse.data?.certificateUrl ||
+      uploadResponse.data?.fileUrl ||
+      uploadResponse.data?.data?.url ||
+      uploadResponse.data?.data?.certificateUrl ||
+      uploadResponse.data?.data?.fileUrl ||
+      ''
+    );
+  };
+
   const handleRegister = async () => {
     const validationErrors = {};
 
@@ -108,6 +131,14 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true);
 
     try {
+      let certificateUrl = '';
+      if (role === 'doctor') {
+        certificateUrl = await uploadDoctorCertificate();
+        if (!certificateUrl) {
+          throw new Error('Failed to upload certificate. Please try again.');
+        }
+      }
+
       const formData = new FormData();
       formData.append('fullName', fullName.trim());
       formData.append('email', email.trim());
@@ -116,15 +147,7 @@ export default function RegisterScreen({ navigation }) {
 
       if (role === 'doctor') {
         formData.append('speciality', specialty.trim());
-
-        const fileType = getFileTypeFromUri(certificate.uri);
-        const fileName = certificate.uri.split('/').pop() || 'certificate.pdf';
-
-        formData.append('certificate', {
-          uri: certificate.uri,
-          name: fileName,
-          type: fileType,
-        });
+        formData.append('certificateUrl', certificateUrl);
       }
 
       const response = await authApi.register(formData);
